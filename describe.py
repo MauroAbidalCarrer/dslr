@@ -16,8 +16,6 @@ from clean_dataset import get_clean_dataset
 #     args = [format_value(x) for x in args]
 #     __builtins__.print(*args, **kwargs)
 
-
-
 def describe_column(column):
     """
     Retruns an array of characteristics of the column:
@@ -34,20 +32,20 @@ def describe_column(column):
     print("float count:", count, ", int count:", int(count))
 
 
-    def median_of(sorted_values):
-        count = len(sorted_values)
+    def median(sorted_values):
         middle_index = len(sorted_values) // 2
-        def mean_of_two(a, b):
-            return (a + b) / 2
-        return sorted_values[middle_index] if count % 2 == 1 else mean_of_two(sorted_values[middle_index - 1], sorted_values[middle_index])
+        if len(sorted_values) % 2 == 1:
+            return sorted_values[middle_index] 
+        else:
+            return (sorted_values[middle_index - 1] + sorted_values[middle_index]) / 2
     return [
         count,
         mean,
         std_deviation,
         sorted_column[0],
-        sorted_column[int(count) // 4],
-        median_of[sorted_column],
-        sorted_column[int(count) * 3 // 4],
+        median(sorted_column[:count // 2]),
+        median(sorted_column),
+        median(sorted_column[count // 2 + count % 2:]),
         sorted_column[int(count) - 1],
     ]
 
@@ -56,4 +54,5 @@ def describe_column(column):
 dataset = get_clean_dataset()
 print("dataset.shape: ", dataset.shape)
 print("my describe:", describe_column(dataset[0]))
+print("quartiles:", calculate_quartiles(dataset[0]))
 print("column: ", np.sort(dataset[0]))
