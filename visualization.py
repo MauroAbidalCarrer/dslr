@@ -10,7 +10,7 @@ nb_features = inputs.shape[0]
 
 # Creating scatterplots for the subset of nb_inputs using the available rows
 SIZE = 35
-fig, axes = plt.subplots(nb_features, nb_features, figsize=(SIZE, SIZE))
+fig, axes = plt.subplots(nb_features, nb_features, figsize=(SIZE, SIZE), dpi=50)
 fig.tight_layout(pad=3.0)
 
 for x in range(nb_features):
@@ -27,5 +27,4 @@ for x in range(nb_features):
             # axes[x, y].set_title(f"Feature {x}")
         axes[x, y].set_xticks([])
         axes[x, y].set_yticks([])
-
 plt.show()
