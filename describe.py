@@ -54,5 +54,4 @@ def describe_column(column):
 dataset = get_clean_dataset()
 print("dataset.shape: ", dataset.shape)
 print("my describe:", describe_column(dataset[0]))
-print("quartiles:", calculate_quartiles(dataset[0]))
 print("column: ", np.sort(dataset[0]))
