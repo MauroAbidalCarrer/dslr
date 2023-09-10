@@ -43,15 +43,15 @@ def get_expected_output_training_data():
     expected_outputs = np.genfromtxt(
         './datasets/dataset_train.csv',
         delimiter=',',
-        dtype=float,
+        dtype=int,
         skip_header=1,
         usecols=1,
-        converters={1: lambda house : float(HOUSES_ARRAY.index(house))}
+        converters={1: lambda house : HOUSES_ARRAY.index(house)}
         )
     return expected_outputs
 
 
 
 # print(get_input_data(TRAIN_DATASET_PATH))
-print(get_input_data(TEST_DATASET_PATH))
+# print(get_input_data(TEST_DATASET_PATH))
 # print(get_expected_output_training_data())
