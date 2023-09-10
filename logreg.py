@@ -31,12 +31,16 @@ class Log_regs:
 
     def backpropagation(self, gradients, learning_rate):
         weighted_sum_gradients = sigmoid_derivative(self.biased_weighted_sums) * gradients
-        print("weighted_sum_gradients:\n", weighted_sum_gradients)
-        print("self.inputs.T:\n", self.inputs.T)
-        print("self.inputs.T.shape:\n", self.inputs.T.shape)
-        print("weighted_sum_gradients:\n", weighted_sum_gradients.shape)
-        # weights_gradients = np.dot(self.inputs.T, weighted_sum_gradients)
+        # print("weighted_sum_gradients:\n", weighted_sum_gradients)
+        # print("self.inputs.T:\n", self.inputs.T)
+        # print("self.inputs.T.shape:\n", self.inputs.T.shape)
+        # print("weighted_sum_gradients:\n", weighted_sum_gradients.shape)
+
+        print("weighted_sum_gradients has nan:", np.isnan(weighted_sum_gradients).any())
+        print("self.inputs. has nan:", np.isnan(self.inputs.T).any())
         weights_gradients = np.dot(self.inputs.T, weighted_sum_gradients)
+        
+        # weights_gradients = np.dot(np.random.randn(2, 1600), np.random.randn(1600, 4))
         print("weights_gradients:\n", weights_gradients)
         biases_gradients = np.sum(gradients, axis=0, keepdims=True)
         print("biases_gradients:\n", biases_gradients)
