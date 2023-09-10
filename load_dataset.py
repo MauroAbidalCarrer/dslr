@@ -50,7 +50,8 @@ def get_expected_output_training_data():
         )
     return expected_outputs
 
-
+def get_training_dataset():
+    return get_input_data(TRAIN_DATASET_PATH), get_expected_output_training_data()
 
 # print(get_input_data(TRAIN_DATASET_PATH))
 # print(get_input_data(TEST_DATASET_PATH))

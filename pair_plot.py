@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from load_dataset import get_expected_output_training_data, get_input_data, TRAIN_DATASET_PATH
+from load_dataset import get_training_dataset
 
 # Correctly subsetting the expected outputs based on the available input rows
-subset_expected_outputs = get_expected_output_training_data()
-inputs = get_input_data(TRAIN_DATASET_PATH)
+inputs, subset_expected_outputs = get_training_dataset()
 nb_features = inputs.shape[0]
 
 # Creating scatterplots for the subset of nb_inputs using the available rows
@@ -21,6 +20,7 @@ for x in range(nb_features):
             if x == 0:
                 axes[x, y].set_ylabel(f"Feature {y}")
         else:
+            # For each house, add an array containing each row where the student belongs to that class.
             data_by_house = [inputs[x, subset_expected_outputs == k] for k in range(4)]
             axes[x, y].hist(data_by_house, bins=30, stacked=True, color=plt.cm.viridis(np.linspace(0, 1, 4)))
         axes[x, y].set_xticks([])
