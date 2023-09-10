@@ -13,7 +13,8 @@ models = Log_regs(2, 4)
 train_dataset_path = sys.argv[1]
 inputs = get_input_data(train_dataset_path)
 inputs = inputs[[2, 3], :]
-intpus = inputs.T
+inputs = inputs.T
+
 expected_outputs = get_expected_output_training_data(train_dataset_path)
 
 models.train(inputs, expected_outputs)
