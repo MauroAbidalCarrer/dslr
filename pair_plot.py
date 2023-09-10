@@ -5,7 +5,6 @@ from load_dataset import get_expected_output_training_data, get_input_data, TRAI
 # Correctly subsetting the expected outputs based on the available input rows
 subset_expected_outputs = get_expected_output_training_data()
 inputs = get_input_data(TRAIN_DATASET_PATH)
-# print(inputs.shape)
 nb_features = inputs.shape[0]
 
 # Creating scatterplots for the subset of nb_inputs using the available rows
@@ -24,7 +23,6 @@ for x in range(nb_features):
         else:
             data_by_house = [inputs[x, subset_expected_outputs == k] for k in range(4)]
             axes[x, y].hist(data_by_house, bins=30, stacked=True, color=plt.cm.viridis(np.linspace(0, 1, 4)))
-            # axes[x, y].set_title(f"Feature {x}")
         axes[x, y].set_xticks([])
         axes[x, y].set_yticks([])
 plt.show()
