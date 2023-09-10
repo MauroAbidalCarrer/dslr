@@ -22,6 +22,8 @@ for x in range(nb_features):
         else:
             # For each house, add an array containing each row where the student belongs to that class.
             data_by_house = [inputs[x, subset_expected_outputs == k] for k in range(4)]
+            # np.linspace(0, 1, 4) creates an array of 4 values going from 0 to 1
+            # plt.cm.viridis() takes in an array of samples and return array of sampled colors.
             axes[x, y].hist(data_by_house, bins=30, stacked=True, color=plt.cm.viridis(np.linspace(0, 1, 4)))
         axes[x, y].set_xticks([])
         axes[x, y].set_yticks([])
