@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 # Implementing one VS all logistic regression model as a fully connected perceptron layer with sigmoid as activation function.
 # Internet article/tuorials are making it look complicated but really that's all it is.
@@ -78,7 +79,20 @@ class Log_regs:
             outputs = self.infer(inputs)
             losses = self.calculate_loss(onehot_expected_outputs)
             self.backpropagation(onehot_expected_outputs, learning_rate)
-            # print()
             print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs))
-            # learning_rate -= 0.001
-        # print(outputs)
+
+    def save(self, filename):
+        with open(filename, 'wb') as file:
+            pickle.dump((self.weights, self.biases), file)
+        print(f"Model saved to {filename}")
+
+    @classmethod
+    def load(cls, filename):
+        with open(filename, 'rb') as file:
+            weights, biases = pickle.load(file)
+        
+        # Initialize an instance of the class
+        instance = cls(weights.shape[0], weights.shape[1])
+        instance.weights = weights
+        instance.biases = biases
+        return instance

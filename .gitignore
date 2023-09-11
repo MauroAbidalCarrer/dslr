@@ -1,3 +1,5 @@
+model_params
+predictions.csv
 datasets*
 
 # Byte-compiled / optimized / DLL files

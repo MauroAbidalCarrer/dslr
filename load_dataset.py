@@ -27,6 +27,16 @@ def get_input_data(path):
 
     return inputs
 
+def get_input_data_for_model(path):
+    inputs = get_input_data(path)
+    inputs = inputs[[2, 3], :]      #Only keep 2nd and 3thd features
+    inputs = inputs.T               #Transpose because we messed up in the previous function with rows and columns -_-
+    #Standard regularization to facilitate training
+    mean = np.mean(inputs, axis=0)
+    std = np.std(inputs, axis=0)
+    inputs = (inputs - mean) / std
+    return inputs
+
 
 def get_expected_output_training_data(path):
     expected_outputs = np.genfromtxt(
