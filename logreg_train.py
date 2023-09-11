@@ -14,6 +14,10 @@ train_dataset_path = sys.argv[1]
 inputs = get_input_data(train_dataset_path)
 inputs = inputs[[2, 3], :]
 inputs = inputs.T
+mean = np.mean(inputs, axis=0)
+std = np.std(inputs, axis=0)
+inputs = (inputs - mean) / std
+
 
 expected_outputs = get_expected_output_training_data(train_dataset_path)
 

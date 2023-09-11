@@ -14,7 +14,8 @@ class Log_regs:
         
     def __init__(self, input_size, nb_outputs):
         # Representing the weights a matrix transposed from the column matrix of the weights for performance.
-        self.weights = np.random.rand(input_size, nb_outputs)
+        # self.weights = np.ones((input_size, nb_outputs))
+        self.weights = np.random.randn(input_size, nb_outputs) * 0.1
         # Representing the biases as a column matrix to be able to add then to the matrix product of inputs-weights.
         self.biases = np.zeros((1, nb_outputs))
 
@@ -25,38 +26,59 @@ class Log_regs:
         """
         self.inputs = inputs
         weighted_sums = np.dot(inputs, self.weights)
-        self.biased_weighted_sums = self.biases + weighted_sums
-        self.outputs = sigmoid(self.biased_weighted_sums)
+        self.biased_weighted_sums_outputs = self.biases + weighted_sums
+        self.outputs = sigmoid(self.biased_weighted_sums_outputs)
         return self.outputs
 
-    def backpropagation(self, gradients, learning_rate):
-        weighted_sum_gradients = sigmoid_derivative(self.biased_weighted_sums) * gradients
-        # print("weighted_sum_gradients:\n", weighted_sum_gradients)
-        # print("self.inputs.T:\n", self.inputs.T)
-        # print("self.inputs.T.shape:\n", self.inputs.T.shape)
-        # print("weighted_sum_gradients:\n", weighted_sum_gradients.shape)
+    def calculate_loss(self, expected_outputs):
+        # Clip data to prevent division by 0
+        # Clip both sides to not drag mean towards any value
+        outputs_clipped = np.clip(self.outputs, 1e-7, 1 - 1e-7)
+        # Calculate sample-wise loss
+        sample_losses = -(expected_outputs * np.log(outputs_clipped) +
+        (1 - expected_outputs) * np.log(1 - outputs_clipped))
+        sample_losses = np.mean(sample_losses, axis=-1)
+        # Return losses
+        return sample_losses
 
-        print("weighted_sum_gradients has nan:", np.isnan(weighted_sum_gradients).any())
-        print("self.inputs. has nan:", np.isnan(self.inputs.T).any())
+    def calculate_loss_gradient(self, expected_outputs):
+        outputs_len = len(self.outputs[0])
+        # Clip data to prevent division by 0
+        # Clip both sides to not drag mean towards any value
+        clipped_dvalues = np.clip(self.outputs, 1e-7, 1 - 1e-7)
+        # Calculate gradient
+        loss_gadients = -(expected_outputs / clipped_dvalues -
+        (1 - expected_outputs) / (1 - clipped_dvalues)) / outputs_len
+        # Normalize gradient
+        loss_gadients = loss_gadients / self.outputs.shape[0]
+        return loss_gadients
+
+    # def backward(self, expected_outputs):
+    def backpropagation(self, expected_outputs, learning_rate):
+        loss_gadients = self.calculate_loss_gradient(expected_outputs)
+        weighted_sum_gradients = sigmoid_derivative(self.biased_weighted_sums_outputs) * loss_gadients
         weights_gradients = np.dot(self.inputs.T, weighted_sum_gradients)
-        
-        # weights_gradients = np.dot(np.random.randn(2, 1600), np.random.randn(1600, 4))
-        print("weights_gradients:\n", weights_gradients)
-        biases_gradients = np.sum(gradients, axis=0, keepdims=True)
-        print("biases_gradients:\n", biases_gradients)
+        biases_gradients = np.sum(loss_gadients, axis=0, keepdims=True)
         self.biases -= biases_gradients * learning_rate
         self.weights -= weights_gradients * learning_rate
+
+    def calculate_mean_accuracy(self, expected_categorical_outputs):
+        # Convert confidance outputs into categorical outputs.
+        model_categorical_outputs = np.argmax(self.outputs, axis=1)
+        # Make a score array of zeros(incorrect outputs) and ones(correct outputs).
+        scores = model_categorical_outputs==expected_categorical_outputs
+        return np.mean(scores)
+
 
     def train(self, inputs, expected_outputs):
         onehot_expected_outputs = np.eye(4)[expected_outputs]
         
-        for _ in range(1):
+        learning_rate = 0.01
+        for _ in range(1500):
             outputs = self.infer(inputs)
-            gradients = np.where(onehot_expected_outputs < outputs, 1, np.where(onehot_expected_outputs > outputs, -1, 0))
-            print("gradients:\n", gradients)
-            self.backpropagation(gradients, 0.1)
-            print('mean accuracy:', np.mean(np.where(outputs == onehot_expected_outputs, 1, 0)))
-
-        # print("weights")
-        # print(self.weights)
-        # print(self.biases)
+            losses = self.calculate_loss(onehot_expected_outputs)
+            self.backpropagation(onehot_expected_outputs, learning_rate)
+            # print()
+            print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs))
+            # learning_rate -= 0.001
+        # print(outputs)

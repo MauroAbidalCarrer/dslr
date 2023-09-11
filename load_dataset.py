@@ -15,11 +15,16 @@ def get_input_data(path):
         )
 
     inputs = inputs.T
-    for col in range(1, 18):
-        median = np.nanmedian(inputs[:, col])
-        nan_indices = np.isnan(inputs[:, col])
-        inputs[nan_indices, col] = median
+    # print(inputs.shape)
+    for col in range(inputs.shape[0]):
+        # print("Column", col, "has nans:", np.isnan(inputs[col, :]).any())
+        median = np.nanmedian(inputs[col, :])
+        nan_indices = np.isnan(inputs[col, :])
+        inputs[col, nan_indices] = median
+        # print("Column", col, "has nans:", np.isnan(inputs[col, :]).any(), "\n")
     
+    # print("inputs has nan:", np.isnan(inputs).any())
+
     return inputs
 
 
