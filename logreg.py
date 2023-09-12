@@ -25,8 +25,10 @@ class Log_regs:
         inputs:  must be a matrix where each row is an input and each column is a feature.
         returns: a matrix of all the inferred outputs, each row is a one hot guess.
         """
-        self.inputs = inputs
-        weighted_sums = np.dot(inputs, self.weights)
+        # Apply standard deviation regularization to faciliate training.
+        self.inputs = (inputs - self.train_mean) / self.train_std
+        
+        weighted_sums = np.dot(self.inputs, self.weights)
         self.biased_weighted_sums_outputs = self.biases + weighted_sums
         self.outputs = sigmoid(self.biased_weighted_sums_outputs)
         return self.outputs
@@ -72,28 +74,36 @@ class Log_regs:
 
 
     def train(self, inputs, expected_outputs):
+        # Standard regularization to facilitate training.
+        # Remember standard regularization  params for inference time.
+        self.train_mean = np.mean(inputs, axis=0)
+        self.train_std = np.std(inputs, axis=0)
+        
         onehot_expected_outputs = np.eye(4)[expected_outputs]
         
         learning_rate = 0.01
         NB_EPOCHS = 2000
         for epoch in range(NB_EPOCHS):
-            outputs = self.infer(inputs)
+            self.infer(inputs)
             losses = self.calculate_loss(onehot_expected_outputs)
             self.backpropagation(onehot_expected_outputs, learning_rate)
-            print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs), end="\r" if epoch != NB_EPOCHS - 1 else "\n")
+            print_end = "\r" if epoch != NB_EPOCHS - 1 else "\n"
+            print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs), end=print_end)
 
     def save(self, filename):
         with open(filename, 'wb') as file:
-            pickle.dump((self.weights, self.biases), file)
-        print(f"Model saved to {filename}")
+            pickle.dump((self.weights, self.biases, self.train_mean, self.train_std), file)
+        print(f"Model saved to file '{filename}'.")
 
     @classmethod
     def load(cls, filename):
         with open(filename, 'rb') as file:
-            weights, biases = pickle.load(file)
+            weights, biases, train_mean, train_std = pickle.load(file)
         
         # Initialize an instance of the class
         instance = cls(weights.shape[0], weights.shape[1])
         instance.weights = weights
         instance.biases = biases
+        instance.train_mean = train_mean
+        instance.train_std = train_std
         return instance

@@ -1,4 +1,3 @@
 tabulate
 numpy
 matplotlib
-pickle

@@ -4,50 +4,45 @@ HOUSES_ARRAY = [b'Ravenclaw', b'Slytherin', b'Gryffindor', b'Hufflepuff']
 TRAIN_DATASET_PATH = './datasets/dataset_train.csv'
 TEST_DATASET_PATH = './datasets/dataset_test.csv'
 
-def get_input_data(path):
-    inputs = np.genfromtxt(
+def get_data(path):
+    hand_converter = lambda hand : {b'Right': 1.0, b'Left': -1.0, b'': np.nan}[hand]
+    # We need to have only floats for isnan, will be converted back to int afterwards.
+    house_converter = lambda house : float(HOUSES_ARRAY.index(house)) 
+    data = np.genfromtxt(
         path,
         delimiter=',',
         dtype=float,
         skip_header=1,
-        usecols=np.arange(5, 18),
-        converters={5: lambda hand : {b'Right': 1.0, b'Left': -1.0, b'': np.nan}[hand]}
+        usecols=[1] + list(range(5, 18)),
+        converters={1: house_converter, 5: hand_converter}
         )
-
-    inputs = inputs.T
-    # print(inputs.shape)
-    for col in range(inputs.shape[0]):
-        # print("Column", col, "has nans:", np.isnan(inputs[col, :]).any())
-        median = np.nanmedian(inputs[col, :])
-        nan_indices = np.isnan(inputs[col, :])
-        inputs[col, nan_indices] = median
-        # print("Column", col, "has nans:", np.isnan(inputs[col, :]).any(), "\n")
     
-    # print("inputs has nan:", np.isnan(inputs).any())
+    # Keep(data[...]) any(.any) row(axis=1) that has no(~) nan elements(np.isnan(data))
+    data = data[~np.isnan(data).any(axis=1)]
 
-    return inputs
+    return data
 
-def get_input_data_for_model(path):
-    inputs = get_input_data(path)
-    inputs = inputs[[2, 3], :]      #Only keep 2nd and 3thd features
-    inputs = inputs.T               #Transpose because we messed up in the previous function with rows and columns -_-
-    #Standard regularization to facilitate training
-    mean = np.mean(inputs, axis=0)
-    std = np.std(inputs, axis=0)
-    inputs = (inputs - mean) / std
-    return inputs
-
-
-def get_expected_output_training_data(path):
-    expected_outputs = np.genfromtxt(
+def get_input_data_for_inferences(path):
+    hand_converter = lambda hand : {b'Right': 1.0, b'Left': -1.0, b'': np.nan}[hand]
+    data = np.genfromtxt(
         path,
         delimiter=',',
-        dtype=int,
+        dtype=float,
         skip_header=1,
-        usecols=1,
-        converters={1: lambda house : HOUSES_ARRAY.index(house)}
+        usecols=list(range(5, 18)),
+        converters={5: hand_converter}
         )
-    return expected_outputs
+    # data = data[~np.isnan(data).any(axis=1)]
+    return data[:, [2, 3]]
+    
+def get_training_dataset(path=TRAIN_DATASET_PATH):
+    data = get_data(path)
+    outputs = data[:, 0].astype(int)
+    inputs = np.delete(data, 0, axis=1)
+    
+    return inputs, outputs
 
-def get_training_dataset():
-    return get_input_data(TRAIN_DATASET_PATH), get_expected_output_training_data(TRAIN_DATASET_PATH)
+def get_training_data_for_model(path):
+    inputs, outputs = get_training_dataset(path)
+    inputs = inputs[:, [2, 3]]      #Only keep 2nd and 3thd feature columns
+    return inputs, outputs
