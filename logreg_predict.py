@@ -10,7 +10,7 @@ if len(sys.argv) < 3:
 if not os.path.isfile("model_params"):
     print("Could not finde 'model_params' file.", file=sys.stderr)
     exit(1)
-    
+
 inputs = get_input_data_for_model(sys.argv[1])
 
 # Get the model outputs and convert it into array of houses names.

@@ -75,11 +75,12 @@ class Log_regs:
         onehot_expected_outputs = np.eye(4)[expected_outputs]
         
         learning_rate = 0.01
-        for _ in range(1500):
+        NB_EPOCHS = 2000
+        for epoch in range(NB_EPOCHS):
             outputs = self.infer(inputs)
             losses = self.calculate_loss(onehot_expected_outputs)
             self.backpropagation(onehot_expected_outputs, learning_rate)
-            print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs))
+            print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs), end="\r" if epoch != NB_EPOCHS - 1 else "\n")
 
     def save(self, filename):
         with open(filename, 'wb') as file:
