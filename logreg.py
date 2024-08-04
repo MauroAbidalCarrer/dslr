@@ -1,6 +1,7 @@
-import numpy as np
 import pickle
+import json
 
+import numpy as np
 # Implementing one VS all logistic regression model as a fully connected perceptron layer with sigmoid as activation function.
 # Internet article/tuorials are making it look complicated but really that's all it is.
 
@@ -14,7 +15,7 @@ def sigmoid_derivative(z):
 class Log_regs:
         
     def __init__(self, input_size, nb_outputs):
-        # Representing the weights a matrix transposed from the column matrix of the weights for performance.
+        # Representing the weights as a transposed matrix from the column matrix of the weights for performance.
         # self.weights = np.ones((input_size, nb_outputs))
         self.weights = np.random.randn(input_size, nb_outputs) * 0.1
         # Representing the biases as a column matrix to be able to add then to the matrix product of inputs-weights.
@@ -38,8 +39,7 @@ class Log_regs:
         # Clip both sides to not drag mean towards any value
         outputs_clipped = np.clip(self.outputs, 1e-7, 1 - 1e-7)
         # Calculate sample-wise loss
-        sample_losses = -(expected_outputs * np.log(outputs_clipped) +
-        (1 - expected_outputs) * np.log(1 - outputs_clipped))
+        sample_losses = -(expected_outputs * np.log(outputs_clipped) + (1 - expected_outputs) * np.log(1 - outputs_clipped))
         sample_losses = np.mean(sample_losses, axis=-1)
         # Return losses
         return sample_losses
@@ -50,8 +50,7 @@ class Log_regs:
         # Clip both sides to not drag mean towards any value
         clipped_dvalues = np.clip(self.outputs, 1e-7, 1 - 1e-7)
         # Calculate gradient
-        loss_gadients = -(expected_outputs / clipped_dvalues -
-        (1 - expected_outputs) / (1 - clipped_dvalues)) / outputs_len
+        loss_gadients = -(expected_outputs / clipped_dvalues - (1 - expected_outputs) / (1 - clipped_dvalues)) / outputs_len
         # Normalize gradient
         loss_gadients = loss_gadients / self.outputs.shape[0]
         return loss_gadients
@@ -91,19 +90,25 @@ class Log_regs:
             print('mean loss:', np.mean(losses), '\taccuracy:', self.calculate_mean_accuracy(expected_outputs), end=print_end)
 
     def save(self, filename):
-        with open(filename, 'wb') as file:
-            pickle.dump((self.weights, self.biases, self.train_mean, self.train_std), file)
-        print(f"Model saved to file '{filename}'.")
+        params = {
+            "weights": self.weights.tolist(), 
+            "biases": self.biases.tolist(),
+            "train_mean": self.train_mean.tolist(),
+            "train_std": self.train_std.tolist(),
+        }
+        with open("model_params.json", "w") as params_cache:
+            json.dump(params, params_cache, indent=1)
+        print(f"Model saved to file model_params.json.")
 
     @classmethod
     def load(cls, filename):
-        with open(filename, 'rb') as file:
-            weights, biases, train_mean, train_std = pickle.load(file)
-        
-        # Initialize an instance of the class
-        instance = cls(weights.shape[0], weights.shape[1])
-        instance.weights = weights
-        instance.biases = biases
-        instance.train_mean = train_mean
-        instance.train_std = train_std
+        with open(filename, 'r') as file:
+            params = json.load(file)
+            # Initialize an instance of the class
+            weights = np.asarray(params["weights"], dtype=float)
+            instance = cls(weights.shape[0], weights.shape[1])
+            instance.weights = weights
+            instance.biases = np.asarray(params["biases"], dtype=float)
+            instance.train_mean = np.asarray(params["train_mean"], dtype=float)
+            instance.train_std = np.asarray(params["train_std"], dtype=float)
         return instance
