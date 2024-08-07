@@ -95,9 +95,10 @@ def describe_all(data):
     """
     Computes and prints statistics for each column of the data.
     """
-    all_descriptions = [describe_column(data[:, col]) for col in range(data.shape[1])]
-    headers = ["Count", "Mean", "Std", "Min", "25%", "50%", "75%", "Max"]
-    col_names = FEATURE_NAMES #[f"Feature {i+1}" for i in range(data.shape[1])]
+    all_descriptions = np.asarray([describe_column(data[:, col]) for col in range(data.shape[1])]).T
+    
+    col_names = ["Count", "Mean", "Std", "Min", "25%", "50%", "75%", "Max"]
+    headers = FEATURE_NAMES #[f"Feature {i+1}" for i in range(data.shape[1])]
     table = tabulate(all_descriptions, headers=headers, showindex=col_names, tablefmt='grid')
     print(table)
 
